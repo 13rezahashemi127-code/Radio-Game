@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio-Game |اخبار گیم</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Vazirmatn & Orbitron -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Vazirmatn:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        neonCyan: '#00f3ff',
+                        neonPink: '#ff007f',
+                        neonPurple: '#9d00ff',
+                        darkBg: '#090a10',
+                        panelBg: '#121420',
+                        panelBorder: '#262940'
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        vazir: ['Vazirmatn', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 15px rgba(0, 243, 255, 0.35)',
+                        'neon-pink': '0 0 15px rgba(255, 0, 127, 0.35)',
+                        'neon-purple': '0 0 20px rgba(157, 0, 255, 0.4)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #090a10;
+            color: #e2e8f0;
+            font-family: 'Vazirmatn', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Scrollbar customization */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090a10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262940;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+
+        .scanline-bg {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.02),
+                rgba(0, 255, 0, 0.01),
+                rgba(0, 0, 255, 0.02)
+            );
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .glow-cyan {
+            text-shadow: 0 0 12px rgba(0, 243, 255, 0.6);
+        }
+
+        .line-clamp-6 {
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Seekbar Custom Styling */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00f3ff;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.8);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00f3ff;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.8);
+            border: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-neonCyan selection:text-black">
+    <!-- Overlay effects -->
+    <div class="fixed inset-0 scanline-bg z-50 pointer-events-none opacity-30"></div>
+
+    <!-- APP CONTAINER -->
+    <div class="flex-grow flex flex-col max-w-7xl w-full mx-auto p-4 md:p-6 gap-6 relative z-10">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row items-center justify-between gap-4 p-5 rounded-2xl bg-panelBg border border-panelBorder shadow-xl">
+            <div class="flex items-center gap-4 cursor-pointer" onclick="switchView('public')">
+                <div class="p-3 bg-gradient-to-tr from-neonPurple via-neonCyan to-neonPink rounded-xl text-black shadow-neon-cyan">
+                    <i data-lucide="radio" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black font-orbitron tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-neonCyan via-white to-neonPink glow-cyan">
+                        RADIO-GAME
+                    </h1>
+                    <p class="text-xs text-slate-400 mt-0.5">پلتفرم اختصاصی اخبار صوتی </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="navPublicBtn" onclick="switchView('public')" class="px-4 py-2.5 rounded-xl bg-neonCyan text-black font-bold text-xs flex items-center gap-2 shadow-neon-cyan transition-all hidden">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    مشاهده وب‌سایت
+                </button>
+                <button id="navDashboardBtn" onclick="switchView('dashboard')" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-neonCyan to-neonPurple text-black font-bold text-xs flex items-center gap-2 shadow-neon-cyan hover:scale-105 transition-all">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                   پنل کاربری
+                </button>
+            </div>
+        </header>
+
+        <!-- VIEW 1: PUBLIC MAIN NEWS PORTAL -->
+        <main id="publicView" class="flex flex-col gap-6">
+            
+            <!-- SEARCH AND INFO BAR -->
+            <div class="bg-panelBg border border-panelBorder rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="relative w-full sm:w-2/3">
+                    <i data-lucide="search" class="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input id="searchInput" type="text" placeholder="جستجوی مستقیم در عنوان، دسته و متن اخبار..." 
+                        class="w-full pr-11 pl-4 py-3 bg-darkBg border border-panelBorder rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-neonCyan transition-all">
+                </div>
+                
+                <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
+                    
+                    <div id="totalCardsBadge" class="text-xs font-bold text-neonPink bg-neonPink/10 border border-neonPink/30 px-3.5 py-2.5 rounded-xl font-mono">
+                        تعداد کل: ۱۲ خبر
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6 CARDS GRID SECTION -->
+            <section id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic 6 cards rendered via JavaScript -->
+            </section>
+
+            <!-- PAGINATION CONTROLLER -->
+            <div class="bg-panelBg border border-panelBorder rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-xs text-slate-400 font-mono">
+                    صفحه <span id="currentPageText" class="text-neonCyan font-bold">1</span> از <span id="totalPagesText" class="text-white">2</span>
+                </div>
+
+                <!-- Page Number Buttons -->
+                <div id="paginationNumbers" class="flex items-center gap-2">
+                    <!-- Dynamic buttons -->
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="prevPageBtn" class="px-4 py-2 rounded-xl bg-darkBg border border-panelBorder text-xs text-slate-300 hover:border-neonCyan disabled:opacity-40 disabled:hover:border-panelBorder flex items-center gap-1 transition-all">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i> قبلی
+                    </button>
+                    <button id="nextPageBtn" class="px-4 py-2 rounded-xl bg-darkBg border border-panelBorder text-xs text-slate-300 hover:border-neonCyan disabled:opacity-40 disabled:hover:border-panelBorder flex items-center gap-1 transition-all">
+                        بعدی <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- VIEW 2: SEPARATED PASSWORD-PROTECTED DASHBOARD PAGE -->
+        <section id="dashboardView" class="hidden flex-col gap-6">
+            
+            <!-- LOGIN OVERLAY / PASSWORD CHECK -->
+            <div id="dashboardAuthLock" class="bg-panelBg border border-panelBorder rounded-2xl p-8 max-w-md mx-auto w-full text-center shadow-2xl flex flex-col items-center gap-4 my-10">
+                <div class="p-4 bg-neonPink/10 border border-neonPink/30 rounded-full text-neonPink">
+                    <i data-lucide="shield-lock" class="w-10 h-10"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white">داشبورد مدیریت Radio-Game</h2>
+                    <p class="text-xs text-slate-400 mt-1">جهت ورود به بخش قرار دادن عکس و ویس رمز عبور را وارد کنید</p>
+                </div>
+
+                <form id="loginForm" class="w-full space-y-3 mt-2">
+                    <input id="adminPasswordInput" type="password" placeholder="رمز عبور (پیش‌فرض: 1234)" 
+                        class="w-full px-4 py-3 bg-darkBg border border-panelBorder rounded-xl text-center text-sm text-white placeholder-slate-500 focus:outline-none focus:border-neonCyan">
+                    <p id="authErrorMsg" class="text-xs text-red-400 hidden font-bold">رمز عبور اشتباه است!</p>
+                    <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-neonCyan to-neonPurple text-black font-bold text-sm shadow-neon-cyan hover:scale-105 transition-all">
+                        ورود به پنل مدیریت
+                    </button>
+                </form>
+            </div>
+
+            <!-- PROTECTED DASHBOARD CONTENT (Hidden until authenticated) -->
+            <div id="dashboardMainContent" class="hidden flex-col gap-6">
+                
+                <div class="bg-panelBg border border-panelBorder rounded-2xl p-5 shadow-lg flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="layout-dashboard" class="w-6 h-6 text-neonCyan"></i>
+                        <div>
+                            <h2 class="text-lg font-bold text-white">پنل مدیریت محتوا و فایل‌های صوتی</h2>
+                            <p class="text-xs text-slate-400">اپلود عکس و ویس از پوشه سیستم و اضافه کردن به کادرهای صفحه اصلی</p>
+                        </div>
+                    </div>
+                    <button onclick="lockDashboard()" class="px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-1.5 hover:bg-red-500 hover:text-white transition-all">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> خروج و قفل پنل
+                    </button>
+                </div>
+
+                <!-- ADD NEW CARD FORM WITH LOCAL FILE PICKERS -->
+                <div class="bg-panelBg border border-panelBorder rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-sm font-bold text-neonCyan mb-4 flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        فرم اضافه کردن کادر خبر جدید
+                    </h3>
+
+                    <form id="addCardForm" class="space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-300 mb-1.5">عنوان خبر / کادر</label>
+                                <input id="formTitle" type="text" required placeholder="عنوان خبر را وارد کنید..." 
+                                    class="w-full px-3.5 py-2.5 bg-darkBg border border-panelBorder rounded-xl text-sm text-white focus:outline-none focus:border-neonCyan">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 mb-1.5">دسته‌بندی</label>
+                                <input id="formCategory" type="text" required placeholder="مثلا: تکنولوژی، بازی" 
+                                    class="w-full px-3.5 py-2.5 bg-darkBg border border-panelBorder rounded-xl text-sm text-white focus:outline-none focus:border-neonCyan">
+                            </div>
+                        </div>
+
+                        <!-- LOCAL FILE INPUTS: IMAGE AND AUDIO -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-darkBg/60 border border-panelBorder rounded-xl">
+                            <!-- Image Input -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                                    <i data-lucide="image" class="w-4 h-4 text-neonCyan"></i>
+                                    انتخاب عکس از پوشه سیستم:
+                                </label>
+                                <input id="formImageFile" type="file" accept="image/*" 
+                                    class="w-full text-xs text-slate-400 file:mr-0 file:ml-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-panelBorder file:text-neonCyan hover:file:bg-neonCyan hover:file:text-black file:cursor-pointer">
+                                <p class="text-[10px] text-slate-500 mt-1">فرمت‌های مجاز: JPG, PNG, WEBP (یا خالی بگذارید برای تصویر پیش‌فرض)</p>
+                            </div>
+
+                            <!-- Audio Input -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                                    <i data-lucide="mic" class="w-4 h-4 text-neonPink"></i>
+                                    انتخاب فایل صوتی / ویس از پوشه:
+                                </label>
+                                <input id="formAudioFile" type="file" accept="audio/*" 
+                                    class="w-full text-xs text-slate-400 file:mr-0 file:ml-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-panelBorder file:text-neonPink hover:file:bg-neonPink hover:file:text-black file:cursor-pointer">
+                                <p class="text-[10px] text-slate-500 mt-1">فرمت‌های مجاز: MP3, WAV, M4A, OGG</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1.5">متن توضیحات خبر (دقیقاً ۶ سطر)</label>
+                            <textarea id="formText" rows="6" required placeholder="توضیحات خبر را در ۶ سطر بنویسید..." 
+                                class="w-full px-3.5 py-2.5 bg-darkBg border border-panelBorder rounded-xl text-sm text-white focus:outline-none focus:border-neonCyan leading-relaxed"></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end">
+                            <button type="submit" class="px-6 py-3 rounded-xl bg-gradient-to-r from-neonCyan via-neonPurple to-neonPink text-black font-bold text-xs shadow-neon-cyan hover:scale-105 transition-all">
+                                انتشار خبر جدید در صفحه اصلی
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- CARDS MANAGEMENT LIST -->
+                <div class="bg-panelBg border border-panelBorder rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
+                        <i data-lucide="list" class="w-4 h-4 text-neonPink"></i>
+                        لیست کلیه اخبار موجود (حذف یا ویرایش)
+                    </h3>
+                    <div id="dashboardCardsList" class="space-y-3">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="text-center py-5 text-xs text-slate-400 font-mono border-t border-panelBorder/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <span class="text-slate-300">سایت خبری و صوتی Radio-Game &copy; ۲۰۲۶ - تمامی حقوق محفوظ است</span>
+            </div>
+
+            <!-- SOCIAL LINKS (RUBIKA & YOUTUBE) -->
+            <div class="flex items-center gap-3">
+                <!-- Rubika Channel Link -->
+                <a href="https://rubika.ir" target="_blank" rel="noopener noreferrer" 
+                   class="px-3.5 py-2 rounded-xl bg-darkBg border border-panelBorder text-purple-400 hover:text-white hover:border-neonPurple hover:bg-neonPurple/20 transition-all flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+                    </svg>
+                    <span class="font-bold font-vazir text-xs">کانال روبیکا</span>
+                </a>
+
+                <!-- YouTube Channel Link -->
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" 
+                   class="px-3.5 py-2 rounded-xl bg-darkBg border border-panelBorder text-red-500 hover:text-white hover:border-red-500 hover:bg-red-500/20 transition-all flex items-center gap-2 shadow-sm">
+                    <i data-lucide="youtube" class="w-4 h-4"></i>
+                    <span class="font-bold font-vazir text-xs">چنل یوتیوب</span>
+                </a>
+            </div>
+
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        lucide.createIcons();
+
+        /* ==========================================================================
+           1. INITIAL SEED DATA (Default 12 items = 2 pages of 6 cards each)
+           ========================================================================== */
+        const DEFAULT_CARDS = [
+            {
+                id: 1,
+                title: 'انقلاب پردازش‌های صوتی و بازی‌های ویدئویی نسل جدید',
+                category: 'تکنولوژی',
+                date: '۱۴۰۴/۱۲/۱۵',
+                image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `صنعت بازی‌های ویدئویی و پلتفرم‌های صوتی تعاملی طی سال‌های اخیر با جهش بی‌نظیری روبرو شده‌اند. ترکیب هوش مصنوعی در تولید افکت‌های صوتی فضایی باعث شده تا تجربه شنیداری کاربران عمیق‌تر از همیشه گردد. امروزه طراحان وب از قابلیت‌های جدید مرورگرها استفاده می‌کنند تا بدون نیاز به پلاگین‌های سنگین، سیستم‌های پخش پادکست و اخبار ۶ سطری را در کنار کادرهای جذاب ارائه دهند.`
+            },
+            {
+                id: 2,
+                title: 'تحلیل جایگاه پادکست‌های کوتاه در افزایش یادگیری',
+                category: 'اخبار صوتی',
+                date: '۱۴۰۴/۱۲/۱۴',
+                image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `تحقیقات جدید نشان می‌دهد که مخاطبان اینترنتی تمایل بیشتری به مرور اخبار خلاصه‌شده در قالب ۶ سطر همراه با فایل صوتی کوتاه دارند. پخش صدای گوینده یا توضیحات ویس در کادرهای مستقل، به کاربران امکان می‌دهد تا در هنگام مرور پلتفرم‌های مختلف، نکات کلیدی اخبار را بدون اتلاف وقت دریافت کرده و تمرکز خود را حفظ کنند.`
+            },
+            {
+                id: 3,
+                title: 'بازسازی حس و حال آرکیدها در سایت‌های مدرن',
+                category: 'نوستالژی',
+                date: '۱۴۰۴/۱۲/۱۳',
+                image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `دستگاه‌های بازی آرکید قدیمی همواره با کادربندی‌های نئونی و افکت‌های صوتی شناخته می‌شدند. امروزه در پلتفرم‌های مدرنی مانند Radio-Game تلاش می‌شود تا همان زیبایی‌شناسی سایبری با رابط کاربری فارسی و استاندارد RTL ترکیب شود. این سبک طراحی تجربه مرور اخبار را جذاب‌تر و کاربرپسندتر می‌کند.`
+            },
+            {
+                id: 4,
+                title: 'بررسی استاندارد کادربندی و طراحی واکنش‌گرا',
+                category: 'طراحی وب',
+                date: '۱۴۰۴/۱۲/۱۲',
+                image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `در طراحی وب‌سایت‌های جدید، استفاده از گریدها با تناسب مشخص در کادرها اهمیت بالایی دارد. تراز بودن تصاویر، عنوان‌ها، توضیحات متنی ۶ خطی و پخش‌کننده ویس در پایین کادر باعث ایجاد نظم بصری بی‌نظیری می‌شود. این کادرها در تمامی نمایشگرهای موبایل، تبلت و دسکتاپ به شکل خودکار مقیاس‌پذیر می‌شوند.`
+            },
+            {
+                id: 5,
+                title: 'تاثیر امواج لو-فای بر کاهش استرس و تمرکز کاری',
+                category: 'موسیقی',
+                date: '۱۴۰۴/۱۲/۱۱',
+                image: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `صداهای پس‌زمینه با فرکانس‌های ثابت و ریتم‌های ملایم می‌توانند بازدهی ذهنی را به شکل چشمگیری ارتقا دهند. بسیاری از برنامه‌نویسان و تولیدکنندگان محتوا ترجیح می‌دهند هنگام کار با کادرهای خبری، به ویس‌های ضبط‌شده یا نوای آرام گوش سپارند تا محیطی ایده‌آل برای تمرکز مداوم فراهم سازند.`
+            },
+            {
+                id: 6,
+                title: 'توسعه داشبوردهای مدیریت داده در جاوااسکریپت',
+                category: 'برنامه‌نویسی',
+                date: '۱۴۰۴/۱۲/۱۰',
+                image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `امکان ثبت و ذخیره‌سازی اطلاعات مستقیماً از طریق مرورگر بدون نیاز به سرورهای پیچیده، از ویژگی‌های مهم برنامه‌های وب modern است. استفاده از قابلیت LocalStorage به مدیران سایت اجازه می‌دهد تا اخبار، عکس‌ها و لینک‌های ویس جدید را وارد کرده و بلافاصله نتایج را در صفحه اصلی مشاهده کنند.`
+            },
+            {
+                id: 7,
+                title: 'روند صعودی هنر دیجیتال و طرح‌های سایبرپانک',
+                category: 'هنر',
+                date: '۱۴۰۴/۱۲/۰۹',
+                image: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `ترکیب رنگ‌های درخشان فسفری و نئون فیروزه‌ای در زمینه‌های تیره، سبکی منحصربه‌فرد را در گرافیک وب پدید آورده است. این نوع کادربندی نئونی توجه بیننده را مستقیماً به سمت عکس شاخص و متن اصلی جلب کرده و حس فناوری‌های پیشرفته آینده را تداعی می‌کند.`
+            },
+            {
+                id: 8,
+                title: 'آینده پلتفرم‌های خبری صوتی در مرورگرها',
+                category: 'آینده‌نگری',
+                date: '۱۴۰۴/۱۲/۰۸',
+                image: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `با گسترش فناوری‌های شنیداری، وب‌سایت‌ها از حالت تک‌بعدی متنی خارج شده و به رسانه‌های چندرسانه‌ای تبدیل می‌شوند. سیستم‌های اخبار صوتی با پلیر اختصاصی در هر کادر خبر به مخاطب این قدرت را می‌دهند تا محتوای مورد علاقه خود را انتخاب و در هر زمان به راحتی گوش دهد.`
+            },
+            {
+                id: 9,
+                title: 'نقش الگوریتم‌های سرچ لحظه‌ای در تجربه کاربری',
+                category: 'تکنولوژی',
+                date: '۱۴۰۴/۱۲/۰۷',
+                image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `امکان جستجوی سریع در عنوان و متن اخبار بدون نیاز به بارگذاری مجدد صفحه، یکی از حیاتی‌ترین نیازهای کاربران مدرن است. فیلتر شدن آنی کادرهای خبری باعث دسترسی در لحظه به اطلاعات شده و جستجو میان صدها خبر و ویس صوتی را به فرایندی لذت‌بخش تبدیل می‌کند.`
+            },
+            {
+                id: 10,
+                title: 'تأثیر صفحه‌بندی منظم در مدیریت حجم اطلاعات',
+                category: 'طراحی کاربردی',
+                date: '۱۴۰۴/۱۲/۰۶',
+                image: 'https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `نمایش دقیق ۶ کادر خبر در هر صفحه جلوی شلوغی و سردرگمی کاربر را می‌گیرد. با استفاده از دکمه‌های شماره‌گذاری شده در انتهای صفحه، کاربر به راحتی به صفحات قبلی و بعدی دسترسی داشته و می‌تواند اخبار قدیمی‌تر را با یک کلیک ساده مرور نماید.`
+            },
+            {
+                id: 11,
+                title: 'راهکارهای بهینه‌سازی فایل‌های صوتی وب',
+                category: 'صوت',
+                date: '۱۴۰۴/۱۲/۰۵',
+                image: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `ذخیره‌سازی و پخش فایل‌های ویس انتخابی از پوشه کاربر، انعطاف‌پذیری بالایی به داشبورد مدیریت می‌دهد. با فشرده‌سازی مناسب فایل‌های صوتی می‌توان لودینگ کادرها را بسیار سریع‌تر کرد.`
+            },
+            {
+                id: 12,
+                title: 'نقش کادربندی ۷ در ۶ در زیبایی‌شناسی وب',
+                category: 'طراحی',
+                date: '۱۴۰۴/۱۲/۰۴',
+                image: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=600&q=80',
+                audioUrl: '',
+                text: `تنظیم ابعاد متناسب برای کادرهای خبری و قرار دادن عکس در بالا، متن توضیحات ۶ خطی در وسط و ویس صوتی در پایین، هماهنگی بی‌نظیری در رزولوشن‌های مختلف به وجود می‌آورد.`
+            }
+        ];
+
+        /* ==========================================================================
+           2. STATE & LOCALSTORAGE MANAGEMENT
+           ========================================================================== */
+        let cardsData = [];
+        let filteredCards = [];
+        let currentPage = 1;
+        const CARDS_PER_PAGE = 6; // Mandatory 6 cards per page
+        let isAuthenticated = false;
+
+        let activeAudioElement = null;
+        let activeAudioCardId = null;
+
+        function initData() {
+            const saved = localStorage.getItem('radio_game_cards_v2');
+            if (saved) {
+                try {
+                    cardsData = JSON.parse(saved);
+                } catch(e) {
+                    cardsData = [...DEFAULT_CARDS];
+                }
+            } else {
+                cardsData = [...DEFAULT_CARDS];
+                saveToLocalStorage();
+            }
+            filteredCards = [...cardsData];
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('radio_game_cards_v2', JSON.stringify(cardsData));
+        }
+
+        /* ==========================================================================
+           3. VIEW SWITCHING (PUBLIC PORTAL VS SEPARATED DASHBOARD)
+           ========================================================================== */
+        const publicView = document.getElementById('publicView');
+        const dashboardView = document.getElementById('dashboardView');
+        const navPublicBtn = document.getElementById('navPublicBtn');
+        const navDashboardBtn = document.getElementById('navDashboardBtn');
+
+        function switchView(view) {
+            stopAllAudio();
+            if (view === 'dashboard') {
+                publicView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                dashboardView.classList.add('flex');
+                navPublicBtn.classList.remove('hidden');
+                navDashboardBtn.classList.add('hidden');
+            } else {
+                dashboardView.classList.add('hidden');
+                dashboardView.classList.remove('flex');
+                publicView.classList.remove('hidden');
+                navPublicBtn.classList.add('hidden');
+                navDashboardBtn.classList.remove('hidden');
+                renderApp();
+            }
+        }
+
+        /* Dashboard Auth Lock */
+        const loginForm = document.getElementById('loginForm');
+        const adminPasswordInput = document.getElementById('adminPasswordInput');
+        const authErrorMsg = document.getElementById('authErrorMsg');
+        const dashboardAuthLock = document.getElementById('dashboardAuthLock');
+        const dashboardMainContent = document.getElementById('dashboardMainContent');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (adminPasswordInput.value === '1234') {
+                isAuthenticated = true;
+                dashboardAuthLock.classList.add('hidden');
+                dashboardMainContent.classList.remove('hidden');
+                dashboardMainContent.classList.add('flex');
+                authErrorMsg.classList.add('hidden');
+                renderDashboardList();
+            } else {
+                authErrorMsg.classList.remove('hidden');
+            }
+        });
+
+        function lockDashboard() {
+            isAuthenticated = false;
+            adminPasswordInput.value = '';
+            dashboardMainContent.classList.add('hidden');
+            dashboardMainContent.classList.remove('flex');
+            dashboardAuthLock.classList.remove('hidden');
+        }
+
+        /* ==========================================================================
+           4. PUBLIC CARDS RENDERER (EXACTLY 6 CARDS / PAGE)
+           ========================================================================== */
+        const cardsGridEl = document.getElementById('cardsGrid');
+        const searchInputEl = document.getElementById('searchInput');
+        const paginationNumbersEl = document.getElementById('paginationNumbers');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const totalCardsBadge = document.getElementById('totalCardsBadge');
+
+        function renderApp() {
+            cardsGridEl.innerHTML = '';
+            totalCardsBadge.textContent = `تعداد کل: ${filteredCards.length} خبر`;
+
+            const totalPages = Math.ceil(filteredCards.length / CARDS_PER_PAGE) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIndex = (currentPage - 1) * CARDS_PER_PAGE;
+            const pageCards = filteredCards.slice(startIndex, startIndex + CARDS_PER_PAGE);
+
+            if (pageCards.length === 0) {
+                cardsGridEl.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-500 font-mono bg-panelBg border border-panelBorder rounded-2xl">
+                        هیچ خبری یافت نشد!
+                    </div>
+                `;
+                renderPagination(1);
+                return;
+            }
+
+            pageCards.forEach(card => {
+                const isPlaying = activeAudioCardId === card.id;
+
+                const cardEl = document.createElement('div');
+                cardEl.className = `bg-panelBg border border-panelBorder rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between transition-all duration-300 hover:border-neonCyan/50 hover:shadow-neon-cyan/20`;
+
+                cardEl.innerHTML = `
+                    <div>
+                        <!-- Image Container (Ratio style) -->
+                        <div class="relative w-full h-48 overflow-hidden bg-darkBg">
+                            <img src="${card.image || 'https://placehold.co/600x400/121420/00f3ff?text=Radio+Game'}" 
+                                 alt="${card.title}" 
+                                 class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                                 onerror="this.src='https://placehold.co/600x400/121420/00f3ff?text=Radio+Game'">
+                            
+                            <span class="absolute top-3 right-3 px-2.5 py-1 bg-darkBg/90 backdrop-blur-md border border-panelBorder text-neonCyan text-[11px] font-bold rounded-lg">
+                                ${card.category || 'خبر'}
+                            </span>
+                            <span class="absolute bottom-3 left-3 text-[10px] text-slate-300 font-mono bg-black/70 px-2 py-0.5 rounded border border-panelBorder">
+                                ${card.date || 'امروز'}
+                            </span>
+                        </div>
+
+                        <!-- Content Area (~6 lines text) -->
+                        <div class="p-4 flex flex-col gap-2">
+                            <h3 class="font-bold text-sm text-white hover:text-neonCyan transition-colors line-clamp-1">
+                                ${card.title}
+                            </h3>
+                            <p class="text-xs text-slate-300 leading-relaxed line-clamp-6 text-justify">
+                                ${card.text}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- ADVANCED VOICE AUDIO PLAYER BAR -->
+                    <div class="p-3 bg-darkBg/95 border-t border-panelBorder flex flex-col gap-2 rounded-b-2xl">
+                        
+                        <!-- Seekbar & Timers -->
+                        <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                            <span id="currTime-${card.id}">${isPlaying ? formatTime(globalAudioElement.currentTime) : '0:00'}</span>
+                            <input id="seekBar-${card.id}" type="range" min="0" max="100" value="${isPlaying && globalAudioElement.duration ? (globalAudioElement.currentTime / globalAudioElement.duration) * 100 : 0}"
+                                oninput="seekAudio(${card.id}, this.value)"
+                                class="flex-grow h-1.5 bg-panelBorder rounded-lg appearance-none cursor-pointer accent-neonCyan">
+                            <span id="durTime-${card.id}">${isPlaying && globalAudioElement.duration ? formatTime(globalAudioElement.duration) : '0:00'}</span>
+                        </div>
+
+                        <!-- Player Controls -->
+                        <div class="flex items-center justify-between gap-2">
+                            
+                            <!-- Left Controls: Play/Pause, Rewind 10s, Forward 10s -->
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="seekOffset(${card.id}, -10)" 
+                                    title="۱۰ ثانیه عقب"
+                                    class="w-8 h-8 rounded-lg bg-panelBorder/60 hover:bg-neonCyan/20 hover:text-neonCyan text-slate-300 flex items-center justify-center transition-all">
+                                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                </button>
+
+                                <button onclick="toggleAudio(${card.id}, '${card.audioUrl || ''}')" 
+                                    class="w-9 h-9 rounded-xl ${isPlaying ? 'bg-neonPink text-white shadow-neon-pink' : 'bg-neonCyan text-black shadow-neon-cyan'} flex items-center justify-center shrink-0 hover:scale-105 transition-all">
+                                    <i data-lucide="${isPlaying ? 'pause' : 'play'}" class="w-4 h-4 fill-current"></i>
+                                </button>
+
+                                <button onclick="seekOffset(${card.id}, 10)" 
+                                    title="۱۰ ثانیه جلو"
+                                    class="w-8 h-8 rounded-lg bg-panelBorder/60 hover:bg-neonCyan/20 hover:text-neonCyan text-slate-300 flex items-center justify-center transition-all">
+                                    <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <!-- Right Controls: Volume Controller -->
+                            <div class="flex items-center gap-1.5 bg-panelBorder/30 px-2 py-1 rounded-lg">
+                                <i data-lucide="volume-2" class="w-3.5 h-3.5 text-neonCyan"></i>
+                                <input type="range" min="0" max="1" step="0.05" value="${currentVolume}" 
+                                    oninput="changeVolume(this.value)"
+                                    class="w-14 h-1 bg-panelBorder rounded-lg appearance-none cursor-pointer accent-neonCyan">
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+
+                cardsGridEl.appendChild(cardEl);
+            });
+
+            lucide.createIcons();
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            paginationNumbersEl.innerHTML = '';
+            document.getElementById('currentPageText').textContent = currentPage;
+            document.getElementById('totalPagesText').textContent = totalPages;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `w-9 h-9 rounded-xl text-xs font-mono font-bold transition-all ${
+                    i === currentPage 
+                    ? 'bg-neonCyan text-black shadow-neon-cyan' 
+                    : 'bg-darkBg border border-panelBorder text-slate-300 hover:border-slate-400'
+                }`;
+                btn.textContent = i;
+                btn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderApp();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+                paginationNumbersEl.appendChild(btn);
+            }
+
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages;
+        }
+
+        /* Search Listener */
+        searchInputEl.addEventListener('input', (e) => {
+            const query = e.target.value.trim().toLowerCase();
+            filteredCards = cardsData.filter(card => 
+                card.title.toLowerCase().includes(query) || 
+                card.text.toLowerCase().includes(query) ||
+                (card.category && card.category.toLowerCase().includes(query))
+            );
+            currentPage = 1;
+            renderApp();
+        });
+
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderApp();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredCards.length / CARDS_PER_PAGE);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderApp();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        /* ==========================================================================
+           5. ADVANCED AUDIO ENGINE (PLAY, PAUSE, REWIND 10s, FORWARD 10s, SEEK, VOLUME)
+           ========================================================================== */
+        let globalAudioElement = new Audio();
+        let currentVolume = 0.8;
+        let audioUpdateInterval = null;
+
+        function toggleAudio(id, url) {
+            if (activeAudioCardId === id) {
+                if (globalAudioElement.paused) {
+                    globalAudioElement.play();
+                } else {
+                    globalAudioElement.pause();
+                }
+            } else {
+                stopAllAudio();
+                activeAudioCardId = id;
+
+                if (url && url.length > 5) {
+                    globalAudioElement.src = url;
+                } else {
+                    // Demo synth ambient voice loop
+                    globalAudioElement.src = 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=synthwave-80s-110045.mp3';
+                }
+
+                globalAudioElement.volume = currentVolume;
+                globalAudioElement.play().catch(e => console.log('Audio playback error', e));
+                startAudioProgressTracker(id);
+            }
+            renderApp();
+        }
+
+        function startAudioProgressTracker(id) {
+            clearInterval(audioUpdateInterval);
+            audioUpdateInterval = setInterval(() => {
+                if (activeAudioCardId === id && globalAudioElement) {
+                    const currEl = document.getElementById(`currTime-${id}`);
+                    const durEl = document.getElementById(`durTime-${id}`);
+                    const seekEl = document.getElementById(`seekBar-${id}`);
+
+                    if (currEl) currEl.textContent = formatTime(globalAudioElement.currentTime);
+                    if (durEl && !isNaN(globalAudioElement.duration)) durEl.textContent = formatTime(globalAudioElement.duration);
+                    if (seekEl && globalAudioElement.duration) {
+                        seekEl.value = (globalAudioElement.currentTime / globalAudioElement.duration) * 100;
+                    }
+
+                    if (globalAudioElement.ended) {
+                        stopAllAudio();
+                    }
+                }
+            }, 250);
+        }
+
+        function seekOffset(id, seconds) {
+            if (activeAudioCardId === id && globalAudioElement) {
+                globalAudioElement.currentTime = Math.max(0, Math.min(globalAudioElement.duration || 0, globalAudioElement.currentTime + seconds));
+            } else {
+                toggleAudio(id, '');
+            }
+        }
+
+        function seekAudio(id, percent) {
+            if (activeAudioCardId === id && globalAudioElement && globalAudioElement.duration) {
+                globalAudioElement.currentTime = (percent / 100) * globalAudioElement.duration;
+            }
+        }
+
+        function changeVolume(val) {
+            currentVolume = parseFloat(val);
+            if (globalAudioElement) {
+                globalAudioElement.volume = currentVolume;
+            }
+        }
+
+        function formatTime(secs) {
+            if (isNaN(secs)) return "0:00";
+            const m = Math.floor(secs / 60);
+            const s = Math.floor(secs % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function stopAllAudio() {
+            clearInterval(audioUpdateInterval);
+            if (globalAudioElement) {
+                globalAudioElement.pause();
+            }
+            activeAudioCardId = null;
+            renderApp();
+        }
+
+        /* ==========================================================================
+           6. DASHBOARD FORM WITH FILE READERS (LOCAL FOLDER PICKER)
+           ========================================================================== */
+        const addCardForm = document.getElementById('addCardForm');
+        const formImageFile = document.getElementById('formImageFile');
+        const formAudioFile = document.getElementById('formAudioFile');
+        const dashboardCardsList = document.getElementById('dashboardCardsList');
+
+        addCardForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            let imageDataUrl = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80';
+            let audioDataUrl = '';
+
+            // Read image from file picker if selected
+            if (formImageFile.files && formImageFile.files[0]) {
+                imageDataUrl = await readFileAsDataURL(formImageFile.files[0]);
+            }
+
+            // Read voice audio from file picker if selected
+            if (formAudioFile.files && formAudioFile.files[0]) {
+                audioDataUrl = await readFileAsDataURL(formAudioFile.files[0]);
+            }
+
+            const newCard = {
+                id: Date.now(),
+                title: document.getElementById('formTitle').value.trim(),
+                category: document.getElementById('formCategory').value.trim() || 'خبر جدید',
+                date: new Date().toLocaleDateString('fa-IR'),
+                image: imageDataUrl,
+                text: document.getElementById('formText').value.trim(),
+                audioUrl: audioDataUrl
+            };
+
+            cardsData.unshift(newCard);
+            saveToLocalStorage();
+
+            filteredCards = [...cardsData];
+            currentPage = 1;
+            renderApp();
+            renderDashboardList();
+
+            addCardForm.reset();
+            alert('خبر جدید همراه با عکس و ویس انتخاب شده با موفقیت به کادرها اضافه شد!');
+        });
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderDashboardList() {
+            dashboardCardsList.innerHTML = '';
+
+            cardsData.forEach(card => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 bg-darkBg border border-panelBorder rounded-xl text-xs';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 truncate max-w-md">
+                        <img src="${card.image}" class="w-10 h-10 rounded-lg object-cover" onerror="this.src='https://placehold.co/100x100/121420/00f3ff?text=News'">
+                        <div>
+                            <span class="text-white truncate font-bold block">${card.title}</span>
+                            <span class="text-[10px] text-slate-400 font-mono">${card.category} | ${card.audioUrl ? 'دارای ویس آپلودی' : 'بدون ویس'}</span>
+                        </div>
+                    </div>
+                    <button onclick="deleteCard(${card.id})" class="px-3 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all flex items-center gap-1">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> حذف
+                    </button>
+                `;
+                dashboardCardsList.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function deleteCard(id) {
+            if (confirm('آیا از حذف این خبر اطمینان دارید؟')) {
+                cardsData = cardsData.filter(c => c.id !== id);
+                saveToLocalStorage();
+                filteredCards = [...cardsData];
+                renderApp();
+                renderDashboardList();
+            }
+        }
+
+        // INITIALIZE APPLICATION
+        window.onload = function() {
+            initData();
+            renderApp();
+        };
+    </script>
+</body>
+</html>
